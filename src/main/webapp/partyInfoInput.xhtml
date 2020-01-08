@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view contentType="text/html">
+
+        <h:head>
+            <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>政党情報</title>
+            </f:facet>
+            <link rel="stylesheet" type="text/css" href="css/partyInfoInput.css" />
+        </h:head>
+
+        <h:body>
+            <h:form>
+                <p:panelGrid columns="3" styleClass="party-info-grid">
+                    <h:outputText value="政党" />
+                    <p:selectOneMenu id="party" value="#{federalElectionController.additionalPartyInfo.party}" required="true" label="政党" requiredMessage="必須項目です">
+                        <f:selectItem itemLabel="選択してください。" itemValue="" />
+                        <f:selectItems value="#{federalElectionController.partyList}" var="party" itemLabel="#{party.name}" itemValue="#{party.name}" />
+                    </p:selectOneMenu>
+                    <p:message for="party" />
+
+                    <h:outputText value="第2票得票数" />
+                    <p:inputText id="secondVotes" value="#{federalElectionController.additionalPartyInfo.secondVotes}" required="true" label="第2票得票数"
+                                 requiredMessage="必須項目です" validatorMessage="0から#{federalElectionController.maxSecondVotes}の間で入力してください"
+                                 converterMessage="半角数字で入力してください">
+                        <f:validateLongRange minimum="0" maximum="#{federalElectionController.maxSecondVotes}" />
+                    </p:inputText>
+                    <p:message for="secondVotes" />
+
+                    <h:outputText value="選挙区獲得議席数" />
+                    <p:inputText id="constituencySeats" value="#{federalElectionController.additionalPartyInfo.constituencySeats}" required="true" label="選挙区獲得議席数"
+                                requiredMessage="必須項目です" validatorMessage="0から#{federalElectionController.maxConstituencySeats}の間で入力してください"
+                                converterMessage="半角数字で入力してください">
+                        <f:validateLongRange minimum="0" maximum="#{federalElectionController.maxConstituencySeats}" />
+                    </p:inputText>
+                    <p:message for="constituencySeats" />
+
+                </p:panelGrid>
+                <p:commandButton value="登録" validateClient="true" actionListener="#{federalElectionController.closePartyInfoDialog}" />
+            </h:form>
+        </h:body>
+
+    </f:view>
+
+</html>

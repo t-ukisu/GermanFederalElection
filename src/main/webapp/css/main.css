@@ -1,0 +1,11 @@
+.text-align-center {
+    text-align: center;
+}
+
+.row-toggler-column {
+    width: 16px;
+}
+
+.text-align-left {
+    text-align: left !important;
+}

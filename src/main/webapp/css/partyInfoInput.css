@@ -1,0 +1,9 @@
+/* 
+    Created on : 2018/10/11, 14:02:12
+    Author     : dev6905768cd
+*/
+
+.party-info-grid.ui-panelgrid > * > tr,
+.party-info-grid.ui-panelgrid .ui-panelgrid-cell {
+    border: none;
+}

@@ -1,0 +1,646 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:o="http://omnifaces.org/ui"
+      xmlns:of="http://omnifaces.org/functions">
+
+    <o:importConstants type="java.util.Objects" var="Objects" />
+    <p:importConstants type="constant.Constants" var="Constants" />
+
+    <f:view contentType="text/html">
+        <h:head>
+            <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>German Federal Election</title>
+            </f:facet>
+            <link rel="stylesheet" type="text/css" href="css/main.css" />
+        </h:head>
+
+        <h:body>
+            <script type="text/javascript" src="js/main.js" />
+
+            <p:layout fullPage="true">
+
+                <p:layoutUnit position="west">
+                    <h:form>
+                        <p:menu model="#{federalElectionController.menuModel}" />
+                    </h:form>
+                </p:layoutUnit>
+
+                <p:layoutUnit position="center">
+
+                    <p:tabView id="seatsDistribution" widgetVar="tabView">
+
+                        <p:tab title="シミュレーション情報" rendered="#{federalElectionController.displaySimulator}">
+                            <h:form>
+                                <p:tabView>
+
+                                    <p:tab title="マスタ管理">
+                                        <p:commandButton value="地域登録" actionListener="#{federalElectionController.addStateList}" oncomplete="PF('stateListTable').addRow();"
+                                                         update="stateInfoTable" />
+                                        <p:commandButton id="stateNameEditButton" update="stateInfoTable" validateClient="true" style="display: none;" />
+                                        <p:dataTable widgetVar="stateListTable" var="stateInfo" value="#{federalElectionController.stateList}" editable="true">
+                                            <f:facet name="header">
+                                                地域マスタ
+                                            </f:facet>
+
+                                            <p:ajax event="rowEdit" oncomplete="clickHiddenButton('stateNameEditButton');" />
+
+                                            <p:column headerText="地域">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        #{stateInfo.state}
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{stateInfo.state}" required="true" label="地域" requiredMessage="必須項目です" style="width: 100%;" />
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column style="width:100px;">
+                                                <p:rowEditor />
+                                            </p:column>
+                                        </p:dataTable>
+                                        
+                                        <br />
+
+                                        <p:commandButton value="政党登録" actionListener="#{federalElectionController.addPartyList}" oncomplete="PF('partyListTable').addRow();" />
+                                        <!--<p:commandButton id="partyNameEditButton" validateClient="true" style="display: none;" />-->
+                                        <p:dataTable widgetVar="partyListTable" var="party" value="#{federalElectionController.partyList}" editable="true">
+                                            <f:facet name="header">
+                                                政党マスタ
+                                            </f:facet>
+
+                                            <!--<p:ajax event="rowEdit" oncomplete="clickHiddenButton('partyNameEditButton');" />-->
+
+                                            <p:column headerText="政党">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        #{party.name}
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{party.name}" required="true" label="政党" requiredMessage="必須項目です" style="width: 100%;" />
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column style="width:100px;">
+                                                <p:rowEditor />
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:tab>
+
+                                    <p:tab title="シミュレーション情報管理">
+                                        <p:commandButton value="シミュレーション実行" actionListener="#{federalElectionController.executeSimulation}" update=":seatsDistribution"
+                                                         oncomplete="PF('tabView').select(1)"/>
+
+                                        <p:commandButton id="stateInfoEditButton" actionListener="#{federalElectionController.onCellEdit}" update="stateInfoTable" validateClient="true"
+                                                         style="display: none;" />
+                                        <p:dataTable id="stateInfoTable" var="stateInfo" value="#{federalElectionController.stateList}" editable="true" editMode="cell" draggableRows="true">
+                                            <p:ajax event="cellEdit" oncomplete="clickHiddenButton('stateInfoEditButton');" />
+
+                                            <p:column styleClass="row-toggler-column">
+                                                <p:rowToggler />
+                                            </p:column>
+                                            <p:column headerText="州" footerText="総計">
+                                                <h:outputText value="#{stateInfo.state}" />
+                                            </p:column>
+                                            <p:column headerText="人口" styleClass="text-align-center">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <h:outputText value="#{stateInfo.population}">
+                                                            <f:convertNumber pattern="###,###.###" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText id="population" value="#{stateInfo.population}" required="true" label="人口"
+                                                                     requiredMessage="必須項目です" validatorMessage="#{Constants.NUMBER_OF_ALL_CONSTITUENCY_SEATS}から2147483647の間で入力してください" converterMessage="半角数字で入力してください">
+                                                            <f:validateLongRange minimum="#{Constants.NUMBER_OF_ALL_CONSTITUENCY_SEATS}" maximum="2147483647" />
+                                                        </p:inputText>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                                <p:message for="population" />
+                                            </p:column>
+                                            <p:column headerText="選挙区数" footerText="#{Constants.NUMBER_OF_ALL_CONSTITUENCY_SEATS}" styleClass="text-align-center">
+                                                <h:outputText value="#{stateInfo.constituencySeats}">
+                                                    <f:convertNumber pattern="###,###.###" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <p:rowExpansion>
+                                                <p:commandButton value="追加" actionListener="#{federalElectionController.openPartyInfoDialog(stateInfo)}">
+                                                    <p:ajax event="dialogReturn" listener="#{federalElectionController.onDialogReturn}" oncomplete="PF('partyInfoTable').addRow();" />
+                                                    <!--update="partyInfoTable"-->
+                                                    <f:attribute name="stateInfo" value="#{stateInfo}" />
+                                                </p:commandButton>
+
+                                                <p:dataTable id="partyInfoTable" widgetVar="partyInfoTable" var="partyInfo" value="#{stateInfo.partyInfoList}" rowKey="#{partyInfo.toString()}"
+                                                             selection="#{federalElectionController.selectedPartyInfo}" selectionMode="single"
+                                                             emptyMessage="政党情報が空です。">
+                                                    <p:ajax event="contextMenu" listener="#{federalElectionController.onDisplayContextMenu}" />
+                                                    <!--<p:ajax event="rowSelect" listener="#{federalElectionController.openPartyInfoDialog}" update="partyInfoTable" />-->
+
+                                                    <p:column headerText="政党">
+                                                        <h:outputText value="#{partyInfo.party}" />
+                                                    </p:column>
+                                                    <p:column headerText="第2票得票数" styleClass="text-align-center">
+                                                        <h:outputText value="#{partyInfo.secondVotes}">
+                                                            <f:convertNumber pattern="###,###.###" />
+                                                        </h:outputText>
+                                                    </p:column>
+                                                    <p:column headerText="選挙区獲得議席数" styleClass="text-align-center">
+                                                        <h:outputText value="#{partyInfo.constituencySeats}">
+                                                            <f:convertNumber pattern="###,###.###" />
+                                                        </h:outputText>
+                                                    </p:column>
+                                                </p:dataTable>
+
+                                                <p:contextMenu for="partyInfoTable">
+                                                    <p:menuitem value="削除" update="partyInfoTable" actionListener="#{federalElectionController.deletePartyInfo(stateInfo)}" />
+                                                </p:contextMenu>
+
+                                            </p:rowExpansion>
+                                        </p:dataTable>
+
+                                        <p:ajaxExceptionHandler type="java.lang.Exception" onexception="PF('exceptionDialog').show();" update="exceptionDialog" />
+                                    </p:tab>
+                                </p:tabView>
+                            </h:form>
+                        </p:tab>
+
+                        <p:tab title="第一段階" rendered="#{federalElectionController.displayResult}">
+                            <p:tabView>
+
+                                <p:tab title="上位配分">
+                                    <p:dataTable var="stateInfo" value="#{federalElectionController.statePopulationInfo.statePopulationInfoList}" draggableRows="true">
+                                        <p:columnGroup type="header">
+                                            <p:row>
+                                                <p:column rowspan="2" headerText="州" />
+                                                <p:column rowspan="2" headerText="人口" />
+                                                <p:column rowspan="2" headerText="除数" />
+                                                <p:column colspan="2" headerText="議席数" />
+                                            </p:row>
+                                            <p:row>
+                                                <p:column headerText="四捨五入前" />
+                                                <p:column headerText="四捨五入後" />
+                                            </p:row>
+                                        </p:columnGroup>
+                                        <p:column>
+                                            #{stateInfo.state}
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            <h:outputText value="#{stateInfo.population}">
+                                                <f:convertNumber pattern="###,###.###" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column styleClass="text-align-center" groupRow="true">
+                                            <h:outputText value="#{federalElectionController.statePopulationInfo.divisor}">
+                                                <f:convertNumber pattern="###,###.###" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            <h:outputText value="#{stateInfo.unrounded}">
+                                                <f:convertNumber pattern="###,###.###" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            #{stateInfo.rounded}
+                                        </p:column>
+                                        <p:columnGroup type="footer">
+                                            <p:row>
+                                                <p:column footerText="総計" styleClass="text-align-left" />
+                                                <p:column>
+                                                    <f:facet name="footer">
+                                                        <h:outputText value="#{federalElectionController.statePopulationInfo.statePopulationInfoList.stream()
+                                                                               .map(d -> d.getPopulation())
+                                                                               .reduce(0, (a, b) -> a + b)}">
+                                                            <f:convertNumber pattern="###,###.###" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+                                                <p:column colspan="2" />
+                                                <p:column footerText="#{federalElectionController.statePopulationInfo.statePopulationInfoList.stream()
+                                                                        .map(d -> d.getRounded())
+                                                                        .reduce(0, (a, b) -> a + b)}" />
+                                            </p:row>
+                                        </p:columnGroup>
+                                    </p:dataTable>
+                                </p:tab>
+
+                                <p:tab title="下位配分">
+                                    <p:dataTable var="stateInfo" value="#{federalElectionController.partySecondsVotesListByState}" stickyHeader="true" scrollHeight="3000" draggableRows="true">
+                                        <p:subTable var="partyInfo" value="#{stateInfo.partySecondVoteInfoList}">
+                                            <f:facet name="header">
+                                                #{stateInfo.state}
+                                            </f:facet>
+                                            <p:columnGroup type="header">
+                                                <p:row>
+                                                    <p:column rowspan="2" headerText="政党" styleClass="text-align-center" />
+                                                    <p:column rowspan="2" headerText="第2票得票数" styleClass="text-align-center" />
+                                                    <p:column rowspan="2" headerText="除数" styleClass="text-align-center" />
+                                                    <p:column colspan="2" headerText="議席数" styleClass="text-align-center" />
+                                                </p:row>
+                                                <p:row>
+                                                    <p:column headerText="四捨五入前" styleClass="text-align-center" />
+                                                    <p:column headerText="四捨五入後" styleClass="text-align-center" />
+                                                </p:row>
+                                            </p:columnGroup>
+                                            <p:column>
+                                                #{partyInfo.party}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                <h:outputText value="#{partyInfo.secondVotes}">
+                                                    <f:convertNumber pattern="###,###.###" />
+                                                </h:outputText>
+                                            </p:column>
+                                            <p:column groupRow="true" styleClass="text-align-center">
+                                                <h:outputText value="#{stateInfo.divisor}">
+                                                    <f:convertNumber pattern="###,###.###" />
+                                                </h:outputText>
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                <h:outputText value="#{partyInfo.unrounded}">
+                                                    <f:convertNumber pattern="###,###.###" />
+                                                </h:outputText>
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{partyInfo.rounded == 0 ? '-' : partyInfo.rounded}
+                                            </p:column>
+                                            <p:columnGroup type="footer">
+                                                <p:row>
+                                                    <p:column footerText="総計" />
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="#{stateInfo.partySecondVoteInfoList.stream()
+                                                                                   .map(d -> d.getSecondVotes())
+                                                                                   .reduce(0, (a , b) -> a + b)}">
+                                                                <f:convertNumber pattern="###,###.###" />
+                                                            </h:outputText>
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column colspan="2" />
+                                                    <p:column footerText="#{stateInfo.partySecondVoteInfoList.stream()
+                                                                            .map(d -> d.getRounded())
+                                                                            .reduce(0, (a , b) -> a + b)}" styleClass="text-align-center" />
+                                                </p:row>
+                                            </p:columnGroup>
+                                        </p:subTable>
+                                    </p:dataTable>
+                                </p:tab>
+
+                                <p:tab title="結果">
+                                    <p:dataTable var="result" value="#{federalElectionController.firstStageResult}" draggableRows="true">
+                                        <p:subTable var="stateSeatsInfo" value="#{result.stateSeatsList}">
+                                            <f:facet name="header">
+                                                #{empty result.party ? '無所属' : result.party}
+                                            </f:facet>
+                                            <p:columnGroup type="header">
+                                                <p:row>
+                                                    <p:column headerText="州" styleClass="text-align-center" />
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="計算上の議席数" />
+                                                            <br />
+                                                            <h:outputText value="(列1)"/>
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="選挙区獲得議席数" />
+                                                            <br />
+                                                            <h:outputText value="(列2)"/>
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column styleClass="text-align-center" rendered="#{result.party != '総計'}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="列1と列2の最大値" />
+                                                            <br />
+                                                            <h:outputText value="(総計 = 最低保障議席数)" />
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column styleClass="text-align-center" rendered="#{result.party == '総計'}">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="第一段階配分議席数" />
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column headerText="うち超過議席" styleClass="text-align-center" />
+                                                </p:row>
+                                            </p:columnGroup>
+                                            <p:column>
+                                                #{stateSeatsInfo.state}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateSeatsInfo.seatQuotas == 0 ? '-' : stateSeatsInfo.seatQuotas}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateSeatsInfo.constituencySeats == 0 ? '-' : stateSeatsInfo.constituencySeats}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateSeatsInfo.largerSeats == 0 ? '-' : stateSeatsInfo.largerSeats}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateSeatsInfo.overhang == 0 ? '-' : stateSeatsInfo.overhang}
+                                            </p:column>
+                                            <p:columnGroup type="footer" rendered="#{result.stateSeatsList.size() > 1}">
+                                                <p:row>
+                                                    <p:column footerText="総計" />
+                                                    <p:column footerText="#{sum = result.stateSeatsList.stream()
+                                                                            .map(d -> d.getSeatQuotas())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{sum = result.stateSeatsList.stream()
+                                                                            .map(d -> d.getConstituencySeats())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{sum = result.stateSeatsList.stream()
+                                                                            .map(d -> d.getLargerSeats())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{sum = result.stateSeatsList.stream()
+                                                                            .map(d -> d.getOverhang())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                </p:row>
+                                            </p:columnGroup>
+                                        </p:subTable>
+                                    </p:dataTable>
+                                </p:tab>
+                            </p:tabView>
+                        </p:tab>
+
+                        <p:tab title="第二段階" rendered="#{federalElectionController.displayResult}">
+                            <p:tabView>
+
+                                <p:tab title="上位配分">
+                                    <p:dataTable var="partyInfo" value="#{federalElectionController.partySeatsInfo.partySeatsInfoList}" draggableRows="true">
+                                        <p:columnGroup type="header">
+                                            <p:row>
+                                                <p:column rowspan="2" headerText="政党" />
+                                                <p:column rowspan="2">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="最低保障議席数" />
+                                                        <br />
+                                                        <h:outputText value="(列1)"/>
+                                                    </f:facet>
+                                                </p:column>
+                                                <p:column rowspan="2" headerText="第2票得票数" />
+                                                <p:column rowspan="2" headerText="除数" />
+                                                <p:column colspan="2" headerText="増加後議席数" />
+                                                <p:column rowspan="2">
+                                                    <f:facet name="header">
+                                                        <h:outputText value="うち調整議席" />
+                                                        <br />
+                                                        <h:outputText value="(列5と列1の差)"/>
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:row>
+                                            <p:row>
+                                                <p:column headerText="四捨五入前" />
+                                                <p:column>
+                                                    <f:facet name="header">
+                                                        <h:outputText value="四捨五入後" />
+                                                        <br />
+                                                        <h:outputText value="(列5)"/>
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:row>
+                                        </p:columnGroup>
+                                        <p:column>
+                                            #{partyInfo.party}
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            <h:outputText value="#{partyInfo.guaranteedMinimumSeats}">
+                                                <f:convertNumber pattern="###,###.###" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            <h:outputText value="#{partyInfo.secondVotes}">
+                                                <f:convertNumber pattern="###,###.###" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column groupRow="true" styleClass="text-align-center">
+                                            <h:outputText value="#{federalElectionController.partySeatsInfo.divisor}">
+                                                <f:convertNumber pattern="###,###.###" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            <h:outputText value="#{partyInfo.unrounded}">
+                                                <f:convertNumber pattern="###,###.###" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            #{partyInfo.rounded}
+                                        </p:column>
+                                        <p:column styleClass="text-align-center">
+                                            #{partyInfo.increasedSeats == 0 ? '-' : partyInfo.increasedSeats}
+                                        </p:column>
+                                        <p:columnGroup type="footer">
+                                            <p:row>
+                                                <p:column footerText="総計" styleClass="text-align-left" />
+                                                <p:column footerText="#{federalElectionController.partySeatsInfo.partySeatsInfoList.stream()
+                                                                        .map(d -> d.getGuaranteedMinimumSeats())
+                                                                        .reduce(0, (a, b) -> a + b)}" />
+                                                <p:column>
+                                                    <f:facet name="footer">
+                                                        <h:outputText value="#{federalElectionController.partySeatsInfo.partySeatsInfoList.stream()
+                                                                               .map(d -> d.getSecondVotes())
+                                                                               .reduce(0, (a, b) -> a + b)}">
+                                                            <f:convertNumber pattern="###,###.###" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+                                                <p:column colspan="2" />
+                                                <p:column footerText="#{federalElectionController.partySeatsInfo.partySeatsInfoList.stream()
+                                                                        .map(d -> d.getRounded())
+                                                                        .reduce(0, (a, b) -> a + b)}" />
+                                                <p:column footerText="#{federalElectionController.partySeatsInfo.partySeatsInfoList.stream()
+                                                                        .map(d -> d.getIncreasedSeats())
+                                                                        .reduce(0, (a, b) -> a + b)}" />
+                                            </p:row>
+                                        </p:columnGroup>
+                                    </p:dataTable>
+                                </p:tab>
+
+                                <p:tab title="下位配分">
+                                    <p:dataTable var="partyInfo" value="#{federalElectionController.partyDistributionList}" draggableRows="true">
+                                        <p:subTable var="stateInfo" value="#{partyInfo.stateInfoList}" rendered="#{partyInfo.stateInfoList.size() > 1}">
+                                            <f:facet name="header">
+                                                #{partyInfo.party}
+                                            </f:facet>
+                                            <p:columnGroup type="header">
+                                                <p:row>
+                                                    <p:column rowspan="2" headerText="州" styleClass="text-align-center" />
+                                                    <p:column rowspan="2" headerText="第2票得票数" styleClass="text-align-center" />
+                                                    <p:column rowspan="2" headerText="除数" styleClass="text-align-center" />
+                                                    <p:column colspan="2" headerText="議席数" styleClass="text-align-center" />
+                                                    <p:column rowspan="2" styleClass="text-align-center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="選挙区獲得議席数" />
+                                                            <br />
+                                                            <h:outputText value="(列5)"/>
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column rowspan="2" headerText="列4と列5の最大値" styleClass="text-align-center" />
+                                                </p:row>
+                                                <p:row>
+                                                    <p:column headerText="四捨五入前" styleClass="text-align-center" />
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="四捨五入後" />
+                                                            <br />
+                                                            <h:outputText value="(列4)"/>
+                                                        </f:facet>
+                                                    </p:column>
+                                                </p:row>
+                                            </p:columnGroup>
+                                            <p:column>
+                                                #{stateInfo.state}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                <h:outputText value="#{stateInfo.secondVotes}">
+                                                    <f:convertNumber pattern="###,###.###" />
+                                                </h:outputText>
+                                            </p:column>
+                                            <p:column groupRow="true" styleClass="text-align-center">
+                                                <h:outputText value="#{partyInfo.divisor}">
+                                                    <f:convertNumber pattern="###,###.###" />
+                                                </h:outputText>
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                <h:outputText value="#{stateInfo.unrounded}">
+                                                    <f:convertNumber pattern="###,###.###" />
+                                                </h:outputText>
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.rounded == 0 ? '-' : stateInfo.rounded}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.constituencySeats == 0 ? '-' : stateInfo.constituencySeats}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.largerSeats == 0 ? '-' : stateInfo.largerSeats}
+                                            </p:column>
+                                            <p:columnGroup type="footer">
+                                                <p:row>
+                                                    <p:column footerText="総計" />
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="#{partyInfo.stateInfoList.stream()
+                                                                                   .map(d -> d.getSecondVotes())
+                                                                                   .reduce(0, (a, b) -> a + b)}">
+                                                                <f:convertNumber pattern="###,###.###" />
+                                                            </h:outputText>
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column colspan="3" />
+                                                    <p:column footerText="#{sum = partyInfo.stateInfoList.stream()
+                                                                            .map(d -> d.getConstituencySeats())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{partyInfo.stateInfoList.stream()
+                                                                            .filter(d -> d.getLargerSeats() ne null)
+                                                                            .map(d -> d.getLargerSeats())
+                                                                            .reduce(0, (a, b) -> a + b)}" styleClass="text-align-center" />
+                                                </p:row>
+                                            </p:columnGroup>
+                                        </p:subTable>
+                                    </p:dataTable>
+                                </p:tab>
+
+                                <p:tab title="結果">
+                                    <p:dataTable var="partyInfo" value="#{federalElectionController.secondStageResult}" draggableRows="true">
+                                        <p:subTable var="stateInfo" value="#{partyInfo.stateInfoList}">
+                                            <f:facet name="header">
+                                                #{empty partyInfo.party ? '無所属' : partyInfo.party}
+                                            </f:facet>
+                                            <p:columnGroup type="header">
+                                                <p:row>
+                                                    <p:column headerText="州" styleClass="text-align-center" />
+                                                    <p:column headerText="選挙区獲得議席数" styleClass="text-align-center" />
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="第一段階配分議席数" />
+                                                            <br />
+                                                            <h:outputText value="(列2)"/>
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column headerText="うち超過議席" styleClass="text-align-center" />
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="第二段階配分議席数" />
+                                                            <br />
+                                                            <h:outputText value="(列4)"/>
+                                                        </f:facet>
+                                                    </p:column>
+                                                    <p:column headerText="うち州名簿配分議席数" styleClass="text-align-center" />
+                                                    <p:column styleClass="text-align-center">
+                                                        <f:facet name="header">
+                                                            <h:outputText value="調整議席数" />
+                                                            <br />
+                                                            <h:outputText value="(列4と列2の差)"/>
+                                                        </f:facet>
+                                                    </p:column>
+                                                </p:row>
+                                            </p:columnGroup>
+                                            <p:column>
+                                                #{stateInfo.state}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.constituencySeats == 0 ? '-' : stateInfo.constituencySeats}
+                                            </p:column>
+                                            <p:column  styleClass="text-align-center">
+                                                #{stateInfo.firstStageResultSeats == 0 ? '-' : stateInfo.firstStageResultSeats}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.overhang == 0 ? '-' : stateInfo.overhang}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.secondStageResultSeats == 0 ? '-' : stateInfo.secondStageResultSeats}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.landListSeats == 0 ? '-' : stateInfo.landListSeats}
+                                            </p:column>
+                                            <p:column styleClass="text-align-center">
+                                                #{stateInfo.increasedSeats == 0 ? '-' : stateInfo.increasedSeats}
+                                            </p:column>
+                                            <p:columnGroup type="footer" rendered="#{partyInfo.stateInfoList.size() > 1}">
+                                                <p:row>
+                                                    <p:column footerText="総計" />
+                                                    <p:column footerText="#{sum = partyInfo.stateInfoList.stream()
+                                                                            .map(d -> d.getConstituencySeats())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{sum = partyInfo.stateInfoList.stream()
+                                                                            .map(d -> d.getFirstStageResultSeats())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{sum = partyInfo.stateInfoList.stream()
+                                                                            .map(d -> d.getOverhang())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{partyInfo.stateInfoList.stream()
+                                                                            .map(d -> d.getSecondStageResultSeats())
+                                                                            .reduce(0, (a, b) -> a + b)}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{sum = partyInfo.stateInfoList.stream()
+                                                                            .map(d -> d.getLandListSeats())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                    <p:column footerText="#{sum = partyInfo.stateInfoList.stream()
+                                                                            .map(d -> d.getIncreasedSeats())
+                                                                            .reduce(0, (a, b) -> a + b); sum == 0 ? '-' : sum}" styleClass="text-align-center" />
+                                                </p:row>
+                                            </p:columnGroup>
+                                        </p:subTable>
+                                    </p:dataTable>
+                                </p:tab>
+                            </p:tabView>
+                        </p:tab>
+
+                    </p:tabView>
+                </p:layoutUnit>
+
+            </p:layout>
+
+            <p:dialog id="exceptionDialog" header="例外 '#{pfExceptionHandler.type}' が発生しました!" widgetVar="exceptionDialog" height="500px" modal="true">
+                メッセージ:#{pfExceptionHandler.message}<br />
+                スタックトレース:<h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" /><br />
+
+                <p:button onclick="document.location.href = document.location.href;" value="再読み込み" rendered="#{pfExceptionHandler.type == 'javax.faces.application.ViewExpiredException'}" />
+            </p:dialog>
+        </h:body>
+
+    </f:view>
+</html>
+
