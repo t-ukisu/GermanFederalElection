@@ -282,7 +282,7 @@ public class FirstStageDistributionLogic {
 
     /**
      *
-     * @param stateInfo
+     * @param year
      * @return
      */
     private static Function<String, Map<String, Integer>> partySecondVotesMapCreator(int year) {
@@ -297,7 +297,7 @@ public class FirstStageDistributionLogic {
 
     /**
      *
-     * @param stateInfo
+     * @param stateList
      * @return
      */
     private static Function<String, Map<String, Integer>> partySecondVotesMapCreator(List<StateSimulatorDto> stateList) {
@@ -313,7 +313,7 @@ public class FirstStageDistributionLogic {
     /**
      * 最低保障議席を返す
      *
-     * @param entry
+     * @param year
      * @return 最低保障議席
      */
     private static Function<String, Map<String, Integer>> stateConstituencySeatsMapCreator(Integer year) {
@@ -329,7 +329,7 @@ public class FirstStageDistributionLogic {
     /**
      * 最低保障議席を返す
      *
-     * @param entry
+     * @param stateList
      * @return 最低保障議席
      */
     private static Function<String, Map<String, Integer>> stateConstituencySeatsMapCreator(List<StateSimulatorDto> stateList) {

@@ -48,7 +48,7 @@ public class ElectionMethodLogic {
 
         // (商の集計結果と配分議席数が等しい かつ 初回計算) または 商の集計結果と配分議席数が等しくない 場合ループする
         BigDecimal selectedDivisor = null;
-        while ((quotSum == seatsNumber && Objects.isNull(selectedDivisor)) || quotSum != seatsNumber) {
+        while (quotSum != seatsNumber || Objects.isNull(selectedDivisor)) {
 
             // 選択除数を決定する
             selectedDivisor = decideSelectedDivisor(targetMap, seatsNumberMap, Integer.compare(quotSum, seatsNumber));
@@ -129,7 +129,7 @@ public class ElectionMethodLogic {
 
         // 商の集計結果と配分議席数が等しくない場合ループする
         BigDecimal selectedDivisor = null;
-        while ((quotSum == seatsNumber && selectedDivisor == null) || quotSum != seatsNumber) {
+        while (quotSum != seatsNumber || selectedDivisor == null) {
 
             // 最低獲得議席数より比例配分議席数が上回った組み合わせを抽出する
             Map<String, Integer> seatsOverMinimumMap = seatsNumberMap.entrySet().stream()
@@ -159,8 +159,8 @@ public class ElectionMethodLogic {
      * @return 合計値
      */
     private static int sumValues(Map<String, Integer> intValueMap) {
-        return intValueMap.entrySet().stream()
-                .mapToInt(Map.Entry::getValue)
+        return intValueMap.values().stream()
+                .mapToInt(i -> i)
                 .sum();
     }
 
@@ -338,7 +338,7 @@ public class ElectionMethodLogic {
         // 下限・上限の小数点以下を切り捨てる
         BigDecimal lowerLimitForCalc = lowerLimit.setScale(0, RoundingMode.FLOOR);
         BigDecimal upperLimitForCalc = upperLimit.setScale(0, RoundingMode.FLOOR);
-        
+
         if (lowerLimitForCalc.compareTo(upperLimitForCalc) == 0) {
             return upperLimit;
         }

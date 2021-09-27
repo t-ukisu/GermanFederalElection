@@ -100,7 +100,7 @@ public class SecondStageDistributionLogic {
      */
     public static List<SecondStageResultDto> tallyElectionResult(List<FirstStageResultDto> firstLevelResult, List<SecondStageUnderDistributionDto> partyDistributionList, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) {
         List<SecondStageResultDto> secondStageResultList = firstLevelResult.stream()
-                .filter(dto -> !dto.getParty().equals(Constants.SUMMARY_TITLE) && !stateIndependentConstituencySeats.keySet().contains(dto.getParty()))
+                .filter(dto -> !dto.getParty().equals(Constants.SUMMARY_TITLE) && !stateIndependentConstituencySeats.containsKey(dto.getParty()))
                 .map(result -> createSecondStageResultInfo(result, partyDistributionList))
                 .collect(Collectors.toList());
 
@@ -130,14 +130,14 @@ public class SecondStageDistributionLogic {
     }
 
     /**
-     * 
+     *
      * @param firstLevelResult
      * @param stateIndependentConstituencySeats
-     * @return 
+     * @return
      */
     private static Map<String, Integer> hoge(List<FirstStageResultDto> firstLevelResult, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) {
         return firstLevelResult.stream()
-                .filter(dto -> !dto.getParty().equals(Constants.SUMMARY_TITLE) && !stateIndependentConstituencySeats.keySet().contains(dto.getParty()))
+                .filter(dto -> !dto.getParty().equals(Constants.SUMMARY_TITLE) && !stateIndependentConstituencySeats.containsKey(dto.getParty()))
                 .collect(Collectors.toMap(FirstStageResultDto::getParty,
                         FirstStageResultDto::getLargerSeatsSum));
     }
@@ -191,11 +191,11 @@ public class SecondStageDistributionLogic {
                 .collect(Collectors.toMap(StateDistributionInfoDto::getState,
                         StateDistributionInfoDto::getSecondVotes));
 
-        Map<String, Integer> stateConsituencySeatsMap = stateInfoList.stream()
+        Map<String, Integer> stateConstituencySeatsMap = stateInfoList.stream()
                 .collect(Collectors.toMap(StateDistributionInfoDto::getState,
                         StateDistributionInfoDto::getConstituencySeats));
 
-        final BigDecimal divisor = ElectionMethodLogic.distributeAllSeatsByTargetMinimumSeats(stateSecondVotesMap, seats, stateConsituencySeatsMap);
+        final BigDecimal divisor = ElectionMethodLogic.distributeAllSeatsByTargetMinimumSeats(stateSecondVotesMap, seats, stateConstituencySeatsMap);
 
         stateInfoList = stateInfoList.stream()
                 .map(info -> info.fillOtherInfo(divisor))
@@ -263,7 +263,7 @@ public class SecondStageDistributionLogic {
 
     /**
      *
-     * @param partySeatsEntry
+     * @param year
      * @return
      */
     private static Function<String, List<StateDistributionInfoDto>> stateInfoListCreator(int year) {
@@ -278,7 +278,7 @@ public class SecondStageDistributionLogic {
 
     /**
      *
-     * @param partySeatsEntry
+     * @param stateList
      * @return
      */
     private static Function<String, List<StateDistributionInfoDto>> stateInfoListCreator(List<StateSimulatorDto> stateList) {
