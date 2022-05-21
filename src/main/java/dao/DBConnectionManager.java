@@ -42,9 +42,10 @@ public class DBConnectionManager {
      */
     static {
         try {
+            Class.forName("org.apache.derby.jdbc.ClientDriver");
             CONNECTION = DriverManager.getConnection(URL, USER, PASSWORD);
             STATEMENT = CONNECTION.createStatement();
-        } catch (SQLException ex) {
+        } catch (SQLException | ClassNotFoundException ex) {
             throw new RuntimeException(ex);
         }
     }

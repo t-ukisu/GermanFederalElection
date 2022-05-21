@@ -117,7 +117,7 @@ public class FederalElectionController implements Serializable {
 
         List<MenuElement> menuItemList = years.stream().map(year -> {
             DefaultMenuItem item = new DefaultMenuItem(year);
-            item.setCommand("#{federalElectionController.executeDistribution(" + year + ")}");
+            item.setCommand("#{federalElectionController.executeDistribution(\"" + year + "\")}");
             item.setUpdate(":seatsDistribution");
 //            item.setOncomplete("changeSelectedMenu($(this));");
             return item;
@@ -146,7 +146,7 @@ public class FederalElectionController implements Serializable {
      * @param year
      * @throws SQLException
      */
-    public void executeDistribution(int year) throws SQLException {
+    public void executeDistribution(String year) throws SQLException {
         setDisplayResult(true);
         setDisplaySimulator(false);
 

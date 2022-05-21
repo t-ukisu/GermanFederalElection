@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class StateInfoDao {
 
-    private static final String SELECT_STATE_POPULATION = "SELECT \"STATE\", POPULATION FROM STATE_INFO S INNER JOIN YEAR_MASTER Y ON S.YEAR_ID = Y.YAER_ID WHERE ELECTION_YEAR = ?";
+    private static final String SELECT_STATE_POPULATION = "SELECT \"STATE\", POPULATION FROM STATE_INFO S INNER JOIN YEAR_MASTER Y ON S.YEAR_ID = Y.YEAR_ID WHERE ELECTION_YEAR = ?";
 
     private static final String SELECT_DISTINCT_STATE = "SELECT DISTINCT \"STATE\" FROM STATE_INFO";
 
@@ -26,9 +26,9 @@ public class StateInfoDao {
      * @return 各州の人口を保持するMap
      * @throws SQLException
      */
-    public static Map<String, Integer> getStatePopulationMap(int year) throws SQLException {
+    public static Map<String, Integer> getStatePopulationMap(String year) throws SQLException {
         try (PreparedStatement preparedStatement = DBConnectionManager.CONNECTION.prepareStatement(SELECT_STATE_POPULATION)) {
-            preparedStatement.setInt(1, year);
+            preparedStatement.setString(1, year);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return DaoUtil.createResultSetStream(resultSet)
                         .collect(Collectors.toMap(

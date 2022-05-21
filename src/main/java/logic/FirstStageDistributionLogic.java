@@ -33,10 +33,10 @@ public class FirstStageDistributionLogic {
      * @param stateIndependentConstituencySeats
      * @return @throws SQLException
      */
-    public static FirstStageUpperDistributionDto executeUpperDistribution(int year, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) throws SQLException {
+    public static FirstStageUpperDistributionDto executeUpperDistribution(String year, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) throws SQLException {
         // 各州の人口データを取得
         Map<String, Integer> statePopulationMap = StateInfoDao.getStatePopulationMap(year);
-        return calculateStateSeats(statePopulationMap, stateIndependentConstituencySeats);
+        return calculateStateSeats(year, statePopulationMap, stateIndependentConstituencySeats);
     }
 
     /**
@@ -49,7 +49,7 @@ public class FirstStageDistributionLogic {
         // 各州の人口データを取得
         Map<String, Integer> statePopulationMap = stateList.stream()
                 .collect(Collectors.toMap(StateSimulatorDto::getState, StateSimulatorDto::getPopulation));
-        return calculateStateSeats(statePopulationMap, new HashMap<>());
+        return calculateStateSeats("", statePopulationMap, new HashMap<>());
     }
 
     /**
@@ -58,7 +58,7 @@ public class FirstStageDistributionLogic {
      * @param statePopulationInfoList
      * @return
      */
-    public static List<FirstStageUnderDistributionDto> executeUnderDistribution(int year, List<StatePopulationDto> statePopulationInfoList) {
+    public static List<FirstStageUnderDistributionDto> executeUnderDistribution(String year, List<StatePopulationDto> statePopulationInfoList) {
         return statePopulationInfoList.stream()
                 .map(dto -> getPartySecondVotesList(dto, partySecondVotesMapCreator(year)))
                 .collect(Collectors.toList());
@@ -83,7 +83,7 @@ public class FirstStageDistributionLogic {
      * @param stateIndependentConstituencySeats
      * @return
      */
-    public static List<FirstStageResultDto> getFirstLevelResultList(int year, List<FirstStageUnderDistributionDto> list, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) {
+    public static List<FirstStageResultDto> getFirstLevelResultList(String year, List<FirstStageUnderDistributionDto> list, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) {
         Map<String, Map<String, Integer>> seatsByPartyMapByStateMap = getSeatsByPartyMapByStateMap(list);
 
         List<FirstStageResultDto> firstStageResultList = seatsByPartyMapByStateMap.entrySet().stream()
@@ -112,11 +112,17 @@ public class FirstStageDistributionLogic {
      * @param statePopulationMap
      * @return
      */
-    private static FirstStageUpperDistributionDto calculateStateSeats(Map<String, Integer> statePopulationMap, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) {
+    private static FirstStageUpperDistributionDto calculateStateSeats(String year, Map<String, Integer> statePopulationMap, Map<String, Map<String, Integer>> stateIndependentConstituencySeats) {
         int independentConstituencySeatsSum = stateIndependentConstituencySeats.values().stream()
                 .flatMap(e -> e.values().stream())
                 .reduce(0, Integer::sum);
-        final BigDecimal divisor = ElectionMethodLogic.calculateSelectedDivisor(statePopulationMap, Constants.NUMBER_OF_ALL_BUNDESTAG_SEATS - independentConstituencySeatsSum);
+        final BigDecimal divisor;
+        try {
+            int totalSeats = PartyInfoDao.getConstituencySeatSumByYear(year) * 2;
+            divisor = ElectionMethodLogic.calculateSelectedDivisor(statePopulationMap, totalSeats - independentConstituencySeatsSum);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
 
         List<StatePopulationDto> statePopulationList = statePopulationMap.entrySet().stream()
                 .map(entry -> createStatePopulationInfo(entry, divisor))
@@ -285,7 +291,7 @@ public class FirstStageDistributionLogic {
      * @param year
      * @return
      */
-    private static Function<String, Map<String, Integer>> partySecondVotesMapCreator(int year) {
+    private static Function<String, Map<String, Integer>> partySecondVotesMapCreator(String year) {
         return state -> {
             try {
                 return PartyInfoDao.getPartySecondVotesMapByState(year, state);
@@ -316,7 +322,7 @@ public class FirstStageDistributionLogic {
      * @param year
      * @return 最低保障議席
      */
-    private static Function<String, Map<String, Integer>> stateConstituencySeatsMapCreator(Integer year) {
+    private static Function<String, Map<String, Integer>> stateConstituencySeatsMapCreator(String year) {
         return party -> {
             try {
                 return PartyInfoDao.getStateConstituencySeatsByParty(year, party);
