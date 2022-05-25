@@ -2,15 +2,10 @@ package logic;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- *
  * @author dev6905768cd
  */
 public class ElectionMethodLogic {
@@ -28,7 +23,7 @@ public class ElectionMethodLogic {
     /**
      * 配分対象の値の割合に応じて、議席配分を行う
      *
-     * @param targetMap 配分対象の値をもつMap
+     * @param targetMap   配分対象の値をもつMap
      * @param seatsNumber 配分する議席数
      * @return 配分対象ごとの議席数をもつMap
      */
@@ -66,7 +61,7 @@ public class ElectionMethodLogic {
     /**
      * 配分対象の配分議席数が最低保障議席数を下回らないよう調整議席を配分する
      *
-     * @param targetMap 配分対象の値をもつMap
+     * @param targetMap       配分対象の値をもつMap
      * @param minimumSeatsMap 配分対象の最低保障議席数をもつMap
      * @return 配分対象が最低保障議席数を下回らないよう比例配分された議席数をもつMap
      */
@@ -105,8 +100,8 @@ public class ElectionMethodLogic {
     /**
      * 配分対象が最低議席数を下回らないように総議席を配分する
      *
-     * @param targetMap 配分対象の値をもつMap
-     * @param seatsNumber 配分する議席数
+     * @param targetMap             配分対象の値をもつMap
+     * @param seatsNumber           配分する議席数
      * @param targetMinimumSeatsMap 配分対象の最低議席数をもつMap
      * @return 配分対象ごとの議席数をもつMap
      */
@@ -167,11 +162,11 @@ public class ElectionMethodLogic {
     /**
      * 指定された条件で除算を行い、その後四捨五入した整数値を返す
      *
-     * @param dividend 被除数
-     * @param divisor 除数
-     * @param scale 商のスケール
+     * @param dividend     被除数
+     * @param divisor      除数
+     * @param scale        商のスケール
      * @param roundingMode 丸めモード
-     * @param isToRound 商を四捨五入するか
+     * @param isToRound    商を四捨五入するか
      * @return dividend / divisor
      */
     private static BigDecimal divide(int dividend, BigDecimal divisor, int scale, RoundingMode roundingMode, boolean isToRound) {
@@ -183,8 +178,8 @@ public class ElectionMethodLogic {
      * 議席配分対象の比例変数を除数で割り配分議席数を計算する
      *
      * @param targetMap 配分対象の値をもつMap
-     * @param divisor 除数
-     * @param scale 値を保持する小数点以下の位の数
+     * @param divisor   除数
+     * @param scale     値を保持する小数点以下の位の数
      * @return 配分対象ごとの議席数をもつMap
      */
     private static Map<String, Integer> calculateSeatsByTarget(Map<String, Integer> targetMap, BigDecimal divisor, int scale) {
@@ -196,8 +191,8 @@ public class ElectionMethodLogic {
     /**
      * 選択除数を決定する
      *
-     * @param targetMap 配分対象の値をもつMap
-     * @param seatsNumberMap 配分対象ごとの議席数をもつMap
+     * @param targetMap           配分対象の値をもつMap
+     * @param seatsNumberMap      配分対象ごとの議席数をもつMap
      * @param differenceFromSeats 商の集計結果と配分議席数の差
      * @return 選択除数
      */
@@ -218,7 +213,7 @@ public class ElectionMethodLogic {
     /**
      * 配分対象の値をキーに、配分対象ごとの議席数を値に持つMapを返す
      *
-     * @param targetMap 配分対象の値をもつMap
+     * @param targetMap      配分対象の値をもつMap
      * @param seatsNumberMap 配分対象ごとの議席数をもつMap
      * @return 配分対象の値をキーに、配分対象ごとの議席数を値に持つMap
      */
@@ -303,7 +298,7 @@ public class ElectionMethodLogic {
      * 配分対象の値から減算した値を用いて除数候補のListを取得する
      *
      * @param targetValueSeatsMap 配分対象の値をキーに、配分対象ごとの議席数を値に持つMap
-     * @param divisor 減数
+     * @param divisor             減数
      * @return 除数候補のList
      */
     private static List<BigDecimal> getDivisorCandidateListMinus(List<TargetValueSeatsDto> targetValueSeatsMap, BigDecimal divisor) {
@@ -317,7 +312,7 @@ public class ElectionMethodLogic {
      * 配分対象の値に加算した値を用いて除数候補のListを取得する
      *
      * @param targetValueSeatsMap 配分対象の値をキーに、配分対象ごとの議席数を値に持つMap
-     * @param divisor 加数
+     * @param divisor             加数
      * @return 除数候補のList
      */
     private static List<BigDecimal> getDivisorCandidateListPlus(List<TargetValueSeatsDto> targetValueSeatsMap, BigDecimal divisor) {
@@ -392,7 +387,7 @@ public class ElectionMethodLogic {
      * 配分対象の比例変数を、議席数から0.5を減じた数で割る
      *
      * @param seatsMap 議席数を値に持つMap
-     * @param entry 配分対象のマッピング
+     * @param entry    配分対象のマッピング
      * @return 除算結果
      */
     private static BigDecimal divideProportionalValueMinus(Map<String, Integer> seatsMap, Map.Entry<String, Integer> entry) {
@@ -407,7 +402,7 @@ public class ElectionMethodLogic {
      * 配分対象の比例変数を、議席数に0.5を加えた数で割る
      *
      * @param seatsMap 議席数を値に持つMap
-     * @param entry 配分対象のマッピング
+     * @param entry    配分対象のマッピング
      * @return 除算結果
      */
     private static BigDecimal divideProportionalValuePlus(Map<String, Integer> seatsMap, Map.Entry<String, Integer> entry) {
@@ -416,7 +411,6 @@ public class ElectionMethodLogic {
     }
 
     /**
-     *
      * @param verifyingMap
      * @param key
      * @param value
@@ -429,7 +423,7 @@ public class ElectionMethodLogic {
     /**
      * 比例配分の商と最低獲得議席のうち、大きいほうを値に持つMapを返す
      *
-     * @param seatsNumberMap 比例配分の商を値に持つMap
+     * @param seatsNumberMap        比例配分の商を値に持つMap
      * @param targetMinimumSeatsMap 最低獲得議席を値に持つMap
      * @return より大きい方を値に持つMap
      */
@@ -444,7 +438,7 @@ public class ElectionMethodLogic {
      * 比例配分の商と最低獲得議席のうち、大きいほうを返す
      *
      * @param targetMinimumSeatsMap 最低獲得議席を値に持つMap
-     * @param entry 比例配分の商のマッピング
+     * @param entry                 比例配分の商のマッピング
      * @return より大きい値
      */
     private static int getGreaterSeats(Map<String, Integer> targetMinimumSeatsMap, Map.Entry<String, Integer> entry) {

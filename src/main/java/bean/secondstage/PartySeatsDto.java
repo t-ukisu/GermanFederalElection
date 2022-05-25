@@ -4,22 +4,20 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- *
  * @author dev6905768cd
  */
 public class PartySeatsDto {
-    
+
     private final String party;
     private final int guaranteedMinimumSeats;
     private final int secondVotes;
     private final BigDecimal unrounded;
 
     /**
-     * 
      * @param party
      * @param guaranteedMinimumSeats
      * @param secondVotes
-     * @param unrounded 
+     * @param unrounded
      */
     public PartySeatsDto(String party, Integer guaranteedMinimumSeats, Integer secondVotes, BigDecimal unrounded) {
         this.party = party;

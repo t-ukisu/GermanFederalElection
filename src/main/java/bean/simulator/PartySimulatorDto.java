@@ -3,7 +3,6 @@ package bean.simulator;
 import java.io.Serializable;
 
 /**
- *
  * @author dev6905768cd
  */
 public class PartySimulatorDto implements Serializable {

@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author dev6905768cd
  */
 public class StateSimulatorDto {
-    
+
     private String state;
     private int population;
     private int constituencySeats;
     private final List<PartySimulatorDto> partyInfoList = new ArrayList<>();
-    
+
     public StateSimulatorDto() {
         this("地域名を入力してください。");
     }

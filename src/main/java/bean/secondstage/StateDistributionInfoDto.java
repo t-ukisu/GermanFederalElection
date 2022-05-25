@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- *
  * @author dev6905768cd
  */
 public class StateDistributionInfoDto {
@@ -12,7 +11,7 @@ public class StateDistributionInfoDto {
     private final String state;
     private final int secondVotes;
     private final int constituencySeats;
-    private  BigDecimal unrounded;
+    private BigDecimal unrounded;
     private int largerSeats;
 
     public StateDistributionInfoDto(String state, int secondVotes, int constituencySeats) {
@@ -22,9 +21,8 @@ public class StateDistributionInfoDto {
     }
 
     /**
-     *
      * @param divisor
-     * @return 
+     * @return
      */
     public StateDistributionInfoDto fillOtherInfo(BigDecimal divisor) {
         this.unrounded = new BigDecimal(this.secondVotes).divide(divisor, 3, RoundingMode.DOWN);

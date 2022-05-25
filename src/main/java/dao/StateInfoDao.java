@@ -1,6 +1,7 @@
 package dao;
 
 import bean.simulator.StateSimulatorDto;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,20 +16,20 @@ import java.util.stream.Collectors;
  */
 public class StateInfoDao {
 
-    private static final String SELECT_STATE_POPULATION = "SELECT \"STATE\", POPULATION FROM STATE_INFO S INNER JOIN YEAR_MASTER Y ON S.YEAR_ID = Y.YEAR_ID WHERE ELECTION_YEAR = ?";
+    private static final String SELECT_STATE_POPULATION = "SELECT \"STATE\", POPULATION FROM STATE_INFO S INNER JOIN YEAR_MASTER Y ON S.YEAR_ID = Y.YEAR_ID WHERE Y.YEAR_ID = ?";
 
     private static final String SELECT_DISTINCT_STATE = "SELECT DISTINCT \"STATE\" FROM STATE_INFO";
 
     /**
      * 各州の人口を取得する
      *
-     * @param year
+     * @param yearId
      * @return 各州の人口を保持するMap
      * @throws SQLException
      */
-    public static Map<String, Integer> getStatePopulationMap(String year) throws SQLException {
+    public static Map<String, Integer> getStatePopulationMap(int yearId) throws SQLException {
         try (PreparedStatement preparedStatement = DBConnectionManager.CONNECTION.prepareStatement(SELECT_STATE_POPULATION)) {
-            preparedStatement.setString(1, year);
+            preparedStatement.setInt(1, yearId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return DaoUtil.createResultSetStream(resultSet)
                         .collect(Collectors.toMap(
@@ -39,7 +40,6 @@ public class StateInfoDao {
     }
 
     /**
-     *
      * @return @throws SQLException
      */
     public static List<StateSimulatorDto> getStates() throws SQLException {

@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- *
  * @author dev6905768cd
  */
 public class DaoUtil {
@@ -30,7 +29,6 @@ public class DaoUtil {
     }
 
     /**
-     *
      * @param rs
      * @param columnIndex
      * @return
@@ -44,7 +42,6 @@ public class DaoUtil {
     }
 
     /**
-     *
      * @param rs
      * @param columnIndex
      * @return

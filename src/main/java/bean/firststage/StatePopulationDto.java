@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- *
  * @author dev6905768cd
  */
 public class StatePopulationDto {
@@ -25,7 +24,6 @@ public class StatePopulationDto {
     private final BigDecimal unrounded;
 
     /**
-     *
      * @param state
      * @param population
      * @param unrounded

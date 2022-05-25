@@ -10,16 +10,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
  * @author dev6905768cd
  */
 public class Util {
 
     /**
-     *
-     * @param <K> Mapのキーとなるクラス
-     * @param <V> Mapの値となるクラス
-     * @param key キー
+     * @param <K>   Mapのキーとなるクラス
+     * @param <V>   Mapの値となるクラス
+     * @param key   キー
      * @param value 値
      * @return
      */
@@ -30,10 +28,9 @@ public class Util {
     }
 
     /**
-     *
-     * @param <K> Mapのキーとなるクラス
-     * @param <V> Mapの値となるクラス
-     * @param baseMap 基となるMap
+     * @param <K>           Mapのキーとなるクラス
+     * @param <V>           Mapの値となるクラス
+     * @param baseMap       基となるMap
      * @param additionalMap 追加のMap
      * @return
      */
@@ -43,14 +40,13 @@ public class Util {
     }
 
     /**
-     *
-     * @param <BO> 基のオブジェクトのクラス
-     * @param <IO> 基のオブジェクトから作り出されたListのクラス
-     * @param <K> 戻り値のMapのキーのクラス
-     * @param <V> 戻り値のMapの値のクラス
-     * @param baseObject 基のオブジェクト
-     * @param listCreator 基のオブジェクトからListを作り出すFunction
-     * @param keyCreator ListのクラスからMapのキーを作り出すFunction
+     * @param <BO>         基のオブジェクトのクラス
+     * @param <IO>         基のオブジェクトから作り出されたListのクラス
+     * @param <K>          戻り値のMapのキーのクラス
+     * @param <V>          戻り値のMapの値のクラス
+     * @param baseObject   基のオブジェクト
+     * @param listCreator  基のオブジェクトからListを作り出すFunction
+     * @param keyCreator   ListのクラスからMapのキーを作り出すFunction
      * @param valueCreator 基のオブジェクトとListのクラスからMapの値を作り出すFunction
      * @return Map
      */
@@ -60,7 +56,6 @@ public class Util {
     }
 
     /**
-     *
      * @param <BO>
      * @param <IO>
      * @param <K>
@@ -74,7 +69,6 @@ public class Util {
     }
 
     /**
-     *
      * @param <T>
      * @param <K>
      * @param classifier
@@ -85,7 +79,6 @@ public class Util {
     }
 
     /**
-     *
      * @param <T>
      * @param <K>
      * @param <A>
@@ -99,7 +92,6 @@ public class Util {
     }
 
     /**
-     *
      * @param <BO>
      * @param <IO>
      * @param <V>

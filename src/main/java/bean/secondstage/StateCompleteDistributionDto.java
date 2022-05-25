@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author dev6905768cd
  */
 public class StateCompleteDistributionDto {
@@ -18,7 +17,6 @@ public class StateCompleteDistributionDto {
     private final int increasedSeats;
 
     /**
-     *
      * @param state
      * @param constituencySeats
      * @param firstStageResultSeats
@@ -38,9 +36,8 @@ public class StateCompleteDistributionDto {
     }
 
     /**
-     * 
      * @param state
-     * @param entry 
+     * @param entry
      */
     public StateCompleteDistributionDto(String state, Map.Entry<String, Map<String, Integer>> entry) {
         this.state = state;
@@ -54,7 +51,6 @@ public class StateCompleteDistributionDto {
     }
 
     /**
-     *
      * @param entry
      */
     public StateCompleteDistributionDto(Map.Entry<String, List<StateCompleteDistributionDto>> entry) {

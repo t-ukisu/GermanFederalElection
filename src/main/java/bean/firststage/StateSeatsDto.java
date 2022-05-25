@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author dev6905768cd
  */
 public class StateSeatsDto {
@@ -16,7 +15,6 @@ public class StateSeatsDto {
     private final int overhang;
 
     /**
-     *
      * @param state
      * @param seatQuotas
      * @param constituencySeats
@@ -32,7 +30,6 @@ public class StateSeatsDto {
     }
 
     /**
-     *
      * @param state
      * @param entry
      */
@@ -46,7 +43,6 @@ public class StateSeatsDto {
     }
 
     /**
-     *
      * @param stateInfoEntry
      */
     public StateSeatsDto(Map.Entry<String, List<StateSeatsDto>> stateInfoEntry) {

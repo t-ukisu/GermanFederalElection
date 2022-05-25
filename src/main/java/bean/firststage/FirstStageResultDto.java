@@ -3,7 +3,6 @@ package bean.firststage;
 import java.util.List;
 
 /**
- *
  * @author dev6905768cd
  */
 public class FirstStageResultDto {

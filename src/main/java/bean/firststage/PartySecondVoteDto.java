@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- *
  * @author dev6905768cd
  */
 public class PartySecondVoteDto {
@@ -25,7 +24,6 @@ public class PartySecondVoteDto {
     private final BigDecimal unrounded;
 
     /**
-     *
      * @param party
      * @param secondVotes
      * @param unrounded

@@ -12,31 +12,24 @@ import bean.simulator.StateSimulatorDto;
 import constant.Constants;
 import dao.PartyInfoDao;
 import dao.YearMasterDao;
-import javax.inject.Named;
-import javax.enterprise.context.SessionScoped;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.el.ImportHandler;
-import javax.faces.context.FacesContext;
 import logic.ElectionMethodLogic;
 import logic.FirstStageDistributionLogic;
 import logic.SecondStageDistributionLogic;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
-import org.primefaces.model.menu.DefaultMenuItem;
-import org.primefaces.model.menu.DefaultMenuModel;
-import org.primefaces.model.menu.DefaultSubMenu;
-import org.primefaces.model.menu.MenuElement;
-import org.primefaces.model.menu.MenuModel;
+import org.primefaces.model.menu.*;
+
+import javax.annotation.PostConstruct;
+import javax.el.ImportHandler;
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * ドイツ連邦議会議員選挙再現Webアプリのバッキングビーン
@@ -90,7 +83,7 @@ public class FederalElectionController implements Serializable {
     private List<StateSimulatorDto> stateList;
 
     /**
-     * 
+     *
      */
     private StateSimulatorDto targetStateInfo;
     /**
@@ -108,16 +101,16 @@ public class FederalElectionController implements Serializable {
 
     @PostConstruct
     public void init() {
-        List<String> years;
+        Map<Integer, String> years;
         try {
             years = YearMasterDao.getYears();
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
 
-        List<MenuElement> menuItemList = years.stream().map(year -> {
-            DefaultMenuItem item = new DefaultMenuItem(year);
-            item.setCommand("#{federalElectionController.executeDistribution(\"" + year + "\")}");
+        List<MenuElement> menuItemList = years.entrySet().stream().map(year -> {
+            DefaultMenuItem item = new DefaultMenuItem(year.getValue());
+            item.setCommand("#{federalElectionController.executeDistribution(" + year.getKey() + ")}");
             item.setUpdate(":seatsDistribution");
 //            item.setOncomplete("changeSelectedMenu($(this));");
             return item;
@@ -142,36 +135,33 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
-     * @param year
+     * @param yearId
      * @throws SQLException
      */
-    public void executeDistribution(String year) throws SQLException {
+    public void executeDistribution(int yearId) throws SQLException {
         setDisplayResult(true);
         setDisplaySimulator(false);
 
-        Map<String, Map<String, Integer>> stateIndependentConstituencySeats = PartyInfoDao.getStateIndependentConstituencySeats(year);
-        setStatePopulationInfo(FirstStageDistributionLogic.executeUpperDistribution(year, stateIndependentConstituencySeats));
-        setPartySecondsVotesListByState(FirstStageDistributionLogic.executeUnderDistribution(year, getStatePopulationInfo().getStatePopulationInfoList()));
-        setFirstStageResult(FirstStageDistributionLogic.getFirstLevelResultList(year, getPartySecondsVotesListByState(), stateIndependentConstituencySeats));
-        setPartySeatsInfo(SecondStageDistributionLogic.executeUpperDistribution(year, getFirstStageResult(), stateIndependentConstituencySeats));
-        setPartyDistributionList(SecondStageDistributionLogic.executeUnderDistribution(year, getPartySeatsInfo().getPartySeatsInfoList()));
+        Map<String, Map<String, Integer>> stateIndependentConstituencySeats = PartyInfoDao.getStateIndependentConstituencySeats(yearId);
+        setStatePopulationInfo(FirstStageDistributionLogic.executeUpperDistribution(yearId, stateIndependentConstituencySeats));
+        setPartySecondsVotesListByState(FirstStageDistributionLogic.executeUnderDistribution(yearId, getStatePopulationInfo().getStatePopulationInfoList()));
+        setFirstStageResult(FirstStageDistributionLogic.getFirstLevelResultList(yearId, getPartySecondsVotesListByState(), stateIndependentConstituencySeats));
+        setPartySeatsInfo(SecondStageDistributionLogic.executeUpperDistribution(yearId, getFirstStageResult(), stateIndependentConstituencySeats));
+        setPartyDistributionList(SecondStageDistributionLogic.executeUnderDistribution(yearId, getPartySeatsInfo().getPartySeatsInfoList()));
         setSecondStageResult(SecondStageDistributionLogic.tallyElectionResult(getFirstStageResult(), getPartyDistributionList(), stateIndependentConstituencySeats));
     }
 
     /**
-     *
      * @throws SQLException
      */
     public void displayStateName() throws SQLException {
         setDisplaySimulator(true);
         setDisplayResult(false);
-        setStateList(new ArrayList<>(Arrays.asList(new StateSimulatorDto())));
-        setPartyList(new ArrayList<>(Arrays.asList(new PartyNameDto())));
+        setStateList(new ArrayList<>(Collections.singletonList(new StateSimulatorDto())));
+        setPartyList(new ArrayList<>(Collections.singletonList(new PartyNameDto())));
     }
 
     /**
-     *
      * @throws SQLException
      */
     public void executeSimulation() throws SQLException {
@@ -198,7 +188,6 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
      * @param stateInfo
      */
     public void openPartyInfoDialog(StateSimulatorDto stateInfo) {
@@ -207,12 +196,12 @@ public class FederalElectionController implements Serializable {
         List<PartySimulatorDto> partyInfoList = stateInfo.getPartyInfoList();
         setMaxSecondVotes(stateInfo.getPopulation()
                 - partyInfoList.stream()
-                        .mapToInt(PartySimulatorDto::getSecondVotes)
-                        .sum());
+                .mapToInt(PartySimulatorDto::getSecondVotes)
+                .sum());
         setMaxConstituencySeats(stateInfo.getConstituencySeats()
                 - partyInfoList.stream()
-                        .mapToInt(PartySimulatorDto::getConstituencySeats)
-                        .sum());
+                .mapToInt(PartySimulatorDto::getConstituencySeats)
+                .sum());
 
         Map<String, Object> options = new HashMap<>();
         options.put("modal", true);
@@ -224,7 +213,6 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
      * @param event
      */
     public void onRowSelect(SelectEvent event) {
@@ -257,7 +245,6 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
      * @param event
      */
     public void onDialogReturn(SelectEvent event) {
@@ -266,7 +253,6 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
      * @param event
      */
     public void onDisplayContextMenu(SelectEvent event) {
@@ -274,7 +260,6 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
      * @param stateInfo
      */
     public void deletePartyInfo(StateSimulatorDto stateInfo) {
@@ -298,8 +283,7 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     * @param partySecondsVotesListByState the partySecondsVotesListByState to
-     * set
+     * @param partySecondsVotesListByState the partySecondsVotesListByState to set
      */
     public void setPartySecondsVotesListByState(List<FirstStageUnderDistributionDto> partySecondsVotesListByState) {
         this.partySecondsVotesListByState = partySecondsVotesListByState;
@@ -378,7 +362,6 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
      * @return
      */
     public PartySimulatorDto getSelectedPartyInfo() {
@@ -386,7 +369,6 @@ public class FederalElectionController implements Serializable {
     }
 
     /**
-     *
      * @param selectedPartyInfo
      */
     public void setSelectedPartyInfo(PartySimulatorDto selectedPartyInfo) {
