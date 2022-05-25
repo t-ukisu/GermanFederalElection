@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class PartyInfoDao {
 
-    private static final String SELECT_PARTY_WITHOUT_DISTRIBUTION = "SELECT PARTY FROM PARTY_INFO P INNER JOIN YEAR_MASTER Y ON P.YEAR_ID = Y.YEAR_ID WHERE Y.YEAR_ID = ? GROUP BY PARTY HAVING PARTY = ''"/* + " OR (SUM(CONSTITUENCY_SEAT) < 3  AND SUM(SECOND_VOTE) < (SELECT SUM(SECOND_VOTE) * 5 / 100 FROM PARTY_INFO))"/**/;
+    private static final String SELECT_PARTY_WITHOUT_DISTRIBUTION = "SELECT PARTY FROM PARTY_INFO P INNER JOIN YEAR_MASTER Y ON P.YEAR_ID = Y.YEAR_ID WHERE Y.YEAR_ID = ? GROUP BY PARTY HAVING PARTY = '' OR (SUM(CONSTITUENCY_SEAT) < 3  AND SUM(SECOND_VOTE) < (SELECT SUM(SECOND_VOTE) * 5 / 100 FROM PARTY_INFO P INNER JOIN YEAR_MASTER Y ON P.YEAR_ID = Y.YEAR_ID WHERE Y.YEAR_ID = ?))";
 
     private static final String SELECT_STATE_INDEPENDENT_CONSTITUENCY_SEATS = "SELECT PARTY, \"STATE\", CONSTITUENCY_SEAT FROM PARTY_INFO P INNER JOIN YEAR_MASTER Y ON P.YEAR_ID = Y.YEAR_ID WHERE Y.YEAR_ID = ? AND PARTY IN (" + SELECT_PARTY_WITHOUT_DISTRIBUTION + ") AND CONSTITUENCY_SEAT > 0";
 
@@ -40,6 +40,7 @@ public class PartyInfoDao {
         try (PreparedStatement preparedStatement = DBConnectionManager.CONNECTION.prepareStatement(SELECT_STATE_INDEPENDENT_CONSTITUENCY_SEATS)) {
             preparedStatement.setInt(1, yearId);
             preparedStatement.setInt(2, yearId);
+            preparedStatement.setInt(3, yearId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return DaoUtil.createResultSetStream(resultSet)
                         .collect(Collectors.toMap(
@@ -61,6 +62,7 @@ public class PartyInfoDao {
             preparedStatement.setInt(1, yearId);
             preparedStatement.setString(2, state);
             preparedStatement.setInt(3, yearId);
+            preparedStatement.setInt(4, yearId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return DaoUtil.createResultSetStream(resultSet)
                         .collect(Collectors.toMap(
@@ -96,10 +98,11 @@ public class PartyInfoDao {
      * @return @throws SQLException
      */
     public static Map<String, Integer> getPartySecondVotesMap(int yearId) throws SQLException {
-        try (PreparedStatement preparedStatemtent = DBConnectionManager.CONNECTION.prepareStatement(SELECT_SECOND_VOTE_SUM_BY_PARTY)) {
-            preparedStatemtent.setInt(1, yearId);
-            preparedStatemtent.setInt(2, yearId);
-            try (ResultSet resultSet = preparedStatemtent.executeQuery()) {
+        try (PreparedStatement preparedStatement = DBConnectionManager.CONNECTION.prepareStatement(SELECT_SECOND_VOTE_SUM_BY_PARTY)) {
+            preparedStatement.setInt(1, yearId);
+            preparedStatement.setInt(2, yearId);
+            preparedStatement.setInt(3, yearId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return DaoUtil.createResultSetStream(resultSet)
                         .collect(Collectors.toMap(
                                 rs -> DaoUtil.getString(rs, 1),
